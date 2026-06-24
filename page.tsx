@@ -1,7 +1,7 @@
 import { fetchCatalogo, formatPrecio, formatKM, driveUrlToThumbnail } from '@/lib/api';
 import WhatsAppButton from '@/components/WhatsAppButton';
+import VehicleGallery from '@/components/VehicleGallery';
 import { notFound } from 'next/navigation';
-import Image from 'next/image';
 import type { Metadata } from 'next';
 
 // SSG por vehículo — Google indexa cada ficha
@@ -42,27 +42,8 @@ export default async function VehiculoDetalle({ params }: { params: { id: string
       <a href="/" className="text-sm text-zinc-500 hover:text-brand">← Volver al catálogo</a>
 
       <div className="grid lg:grid-cols-2 gap-8 mt-6">
-        {/* Galería */}
-        <div className="space-y-3">
-          {fotos.length > 0 ? (
-            <>
-              <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-carbon-900">
-                <Image src={fotos[0]} alt={`${v.Marca} ${v.Modelo}`} fill className="object-cover" unoptimized />
-              </div>
-              <div className="grid grid-cols-3 gap-2">
-                {fotos.slice(1, 4).map((f, i) => (
-                  <div key={i} className="relative aspect-[4/3] rounded-lg overflow-hidden bg-carbon-900">
-                    <Image src={f} alt={`${v.Marca} ${v.Modelo} foto ${i+2}`} fill className="object-cover" unoptimized />
-                  </div>
-                ))}
-              </div>
-            </>
-          ) : (
-            <div className="aspect-[4/3] rounded-2xl bg-carbon-800 flex items-center justify-center text-zinc-700">
-              Sin imágenes
-            </div>
-          )}
-        </div>
+        {/* Galería — hasta 12 fotos con click-to-expand y navegación */}
+        <VehicleGallery fotos={fotos} alt={`${v.Marca} ${v.Modelo}`} />
 
         {/* Info */}
         <div>
