@@ -56,7 +56,28 @@ export default function VehicleCard({ v }: { v: Vehiculo }) {
               ⚙ {v.Transmision}
             </span>
           )}
+          {v.Combustible && (
+            <span className="text-[11px] bg-carbon-700 text-zinc-300 px-2 py-1 rounded">
+              ⛽ {v.Combustible}
+            </span>
+          )}
+          {v.Traccion && (
+            <span className="text-[11px] bg-carbon-700 text-zinc-300 px-2 py-1 rounded">
+              🚙 {v.Traccion}
+            </span>
+          )}
+          {v.Motor && (
+            <span className="text-[11px] bg-carbon-700 text-zinc-300 px-2 py-1 rounded">
+              🔧 {v.Motor}
+            </span>
+          )}
         </div>
+
+        {v.Descripcion_Publica && (
+          <p className="mt-3 text-xs text-zinc-400 line-clamp-2 leading-relaxed">
+            {v.Descripcion_Publica}
+          </p>
+        )}
 
         <WhatsAppButton vehiculo={v} className="mt-5 w-full" />
       </div>

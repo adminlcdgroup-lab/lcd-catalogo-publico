@@ -6,7 +6,7 @@ export default function WhatsAppButton({
   className = '',
 }: { vehiculo: Vehiculo; className?: string }) {
   const msg = encodeURIComponent(
-    `Hola, me interesa el ${vehiculo.Marca} ${vehiculo.Modelo} ${vehiculo.Año || ''} (ref: ${vehiculo.ID}). ¿Sigue disponible?`
+    `Hola LCD Group, me interesa el *${vehiculo.Marca} ${vehiculo.Modelo} ${vehiculo.Año || ''}* (Ref: ${vehiculo.ID}). ¿Podría coordinar una visita para verlo?`
   );
   const href = `https://wa.me/${WHATSAPP}?text=${msg}`;
 

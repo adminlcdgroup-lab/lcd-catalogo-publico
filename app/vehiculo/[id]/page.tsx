@@ -1,7 +1,7 @@
 import { fetchCatalogo, formatPrecio, formatKM, driveUrlToThumbnail } from '@/lib/api';
 import WhatsAppButton from '@/components/WhatsAppButton';
+import VehicleGallery from '@/components/VehicleGallery';
 import { notFound } from 'next/navigation';
-import Image from 'next/image';
 import type { Metadata } from 'next';
 
 // SSG por vehículo — Google indexa cada ficha
@@ -42,27 +42,8 @@ export default async function VehiculoDetalle({ params }: { params: { id: string
       <a href="/" className="text-sm text-zinc-500 hover:text-brand">← Volver al catálogo</a>
 
       <div className="grid lg:grid-cols-2 gap-8 mt-6">
-        {/* Galería */}
-        <div className="space-y-3">
-          {fotos.length > 0 ? (
-            <>
-              <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-carbon-900">
-                <Image src={fotos[0]} alt={`${v.Marca} ${v.Modelo}`} fill className="object-cover" unoptimized />
-              </div>
-              <div className="grid grid-cols-3 gap-2">
-                {fotos.slice(1, 4).map((f, i) => (
-                  <div key={i} className="relative aspect-[4/3] rounded-lg overflow-hidden bg-carbon-900">
-                    <Image src={f} alt={`${v.Marca} ${v.Modelo} foto ${i+2}`} fill className="object-cover" unoptimized />
-                  </div>
-                ))}
-              </div>
-            </>
-          ) : (
-            <div className="aspect-[4/3] rounded-2xl bg-carbon-800 flex items-center justify-center text-zinc-700">
-              Sin imágenes
-            </div>
-          )}
-        </div>
+        {/* Galería — hasta 12 fotos con click-to-expand y navegación */}
+        <VehicleGallery fotos={fotos} alt={`${v.Marca} ${v.Modelo}`} />
 
         {/* Info */}
         <div>
@@ -77,19 +58,41 @@ export default async function VehiculoDetalle({ params }: { params: { id: string
             {formatPrecio(v.Precio_Publicacion)}
           </div>
 
-          <div className="grid grid-cols-2 gap-3 mt-8">
-            {[
-              ['Kilometraje', formatKM(v.KM)],
-              ['Transmisión', v.Transmision || '—'],
-              ['Año',         String(v.Año || '—')],
-              ['Referencia',  v.ID],
-            ].map(([k, val]) => (
-              <div key={k} className="bg-carbon-800 border border-carbon-700 rounded-xl p-4">
-                <div className="text-[10px] uppercase tracking-widest text-zinc-500">{k}</div>
-                <div className="text-base font-bold mt-1">{val}</div>
-              </div>
-            ))}
+          {/* Ficha técnica COMPLETA */}
+          <div className="mt-8">
+            <h3 className="text-xs uppercase tracking-widest text-zinc-500 font-bold mb-3">Ficha técnica</h3>
+            <div className="grid grid-cols-2 gap-3">
+              {([
+                ['Kilometraje',  formatKM(v.KM)],
+                ['Transmisión',  v.Transmision],
+                ['Combustible',  v.Combustible],
+                ['Motor',        v.Motor],
+                ['Tracción',     v.Traccion],
+                ['Color',        v.Color],
+                ['Pasajeros',    v.Pasajeros ? String(v.Pasajeros) : null],
+                ['Pantalla',     v.Pantalla],
+                ['Año',          v.Año ? String(v.Año) : null],
+                ['Referencia',   v.ID],
+              ] as [string, string | null | undefined][])
+                .filter(([_, val]) => val && String(val).trim() !== '' && String(val).trim() !== '—')
+                .map(([k, val]) => (
+                  <div key={k} className="bg-carbon-800 border border-carbon-700 rounded-xl p-4">
+                    <div className="text-[10px] uppercase tracking-widest text-zinc-500">{k}</div>
+                    <div className="text-base font-bold mt-1">{val}</div>
+                  </div>
+                ))}
+            </div>
           </div>
+
+          {/* Descripción pública del vendedor */}
+          {v.Descripcion_Publica && (
+            <div className="mt-6 bg-carbon-800 border border-carbon-700 rounded-xl p-5">
+              <h3 className="text-xs uppercase tracking-widest text-brand font-bold mb-3">📝 Sobre este vehículo</h3>
+              <p className="text-sm text-zinc-300 leading-relaxed whitespace-pre-wrap">
+                {v.Descripcion_Publica}
+              </p>
+            </div>
+          )}
 
           <WhatsAppButton vehiculo={v} className="mt-6 w-full !py-4 !text-base" />
 
