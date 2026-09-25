@@ -72,8 +72,12 @@ async function fetchCatalogoSupabase(): Promise<Vehiculo[] | null> {
   if (!SUPABASE_URL || !SUPABASE_ANON_KEY) return null;
   try {
     const url = `${SUPABASE_URL}/rest/v1/catalogo_publico?select=*`;
+    // La clave publicable nueva (sb_publishable_…) no es un JWT: solo va en
+    // apikey. La antigua (eyJ…) va también en Authorization.
+    const headers: Record<string, string> = { apikey: SUPABASE_ANON_KEY };
+    if (SUPABASE_ANON_KEY.startsWith('eyJ')) headers.Authorization = `Bearer ${SUPABASE_ANON_KEY}`;
     const res = await fetch(url, {
-      headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` },
+      headers,
       next: { revalidate: REVALIDATE_SECONDS },
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
