@@ -93,7 +93,8 @@ async function fetchCatalogoAppsScript(): Promise<Vehiculo[]> {
     console.warn('Ni Supabase ni NEXT_PUBLIC_APPS_SCRIPT_URL están configurados');
     return [];
   }
-  const url = `${APPS_SCRIPT_URL}?action=catalogoPublico&t=${Date.now()}`;
+  // R22: sin marca de tiempo; con ella cada lectura era una clave de caché nueva
+  const url = `${APPS_SCRIPT_URL}?action=catalogoPublico`;
   try {
     const res = await fetch(url, {
       next: { revalidate: REVALIDATE_SECONDS },

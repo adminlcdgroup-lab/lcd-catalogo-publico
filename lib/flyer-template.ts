@@ -27,13 +27,18 @@ export type FlyerData = {
   logoUrl:        string;       // URL pública del logo LCD
 };
 
+// R22 · Solo se admiten imágenes embebidas (data:image) o alojadas en Google
+// (Drive / googleusercontent). Antes cualquier URL llegaba a Chrome, que la
+// descargaba desde el servidor de Vercel (SSRF).
+export const IMAGEN_PERMITIDA = /^(data:image\/(png|jpe?g|webp);base64,[a-z0-9+\/=\s]+$|https:\/\/(drive\.google\.com|[a-z0-9-]+\.googleusercontent\.com)\/)/i;
+
 // Convierte URL de Drive a thumbnail estable
 function drive(url: string, size = 1200): string {
   if (!url) return '';
-  const m1 = url.match(/[?&]id=([^&]+)/);
-  const m2 = url.match(/\/d\/([^/]+)/);
+  const m1 = url.match(/[?&]id=([A-Za-z0-9_-]+)/);
+  const m2 = url.match(/\/d\/([A-Za-z0-9_-]+)/);
   const id = m1 ? m1[1] : (m2 ? m2[1] : null);
-  if (!id) return url;
+  if (!id) return IMAGEN_PERMITIDA.test(url) ? url : '';
   return `https://drive.google.com/thumbnail?id=${id}&sz=w${size}`;
 }
 
@@ -52,7 +57,7 @@ export function renderFlyerHTML(d: FlyerData): string {
   const g1    = drive(d.galeria?.[0] || '', 600);
   const g2    = drive(d.galeria?.[1] || '', 600);
   const g3    = drive(d.galeria?.[2] || '', 600);
-  const logo  = d.logoUrl || 'https://drive.google.com/thumbnail?id=19FylJ0QVp0DwCqmMVgrjKcBP-VkRE0Jc&sz=w400';
+  const logo  = (d.logoUrl && IMAGEN_PERMITIDA.test(d.logoUrl)) ? d.logoUrl : 'https://drive.google.com/thumbnail?id=19FylJ0QVp0DwCqmMVgrjKcBP-VkRE0Jc&sz=w400';
 
   return `<!DOCTYPE html>
 <html lang="es">
