@@ -18,13 +18,15 @@ export const dynamic     = 'force-dynamic';
 // R22 · Solo la app del ERP (GitHub Pages) puede pedir flyers, y con una
 // sesión válida de admin o tasador. Antes el endpoint estaba abierto a
 // cualquiera (CORS *) y cada pedido gastaba ~30 s de Chrome.
-const ORIGEN_ERP = 'https://adminlcdgroup-lab.github.io';
-const corsHeaders = {
-  'Access-Control-Allow-Origin'  : ORIGEN_ERP,
+// R24 · El ERP pasó a lcdgroup.vercel.app. GitHub Pages queda solo como
+// redirección, pero se sigue aceptando mientras haya pestañas abiertas allá.
+const ORIGENES_ERP = ['https://lcdgroup.vercel.app', 'https://adminlcdgroup-lab.github.io'];
+const corsPara = (origin: string | null) => ({
+  'Access-Control-Allow-Origin'  : origin && ORIGENES_ERP.includes(origin) ? origin : ORIGENES_ERP[0],
   'Access-Control-Allow-Methods' : 'POST, OPTIONS',
   'Access-Control-Allow-Headers' : 'Content-Type',
   'Vary'                         : 'Origin',
-};
+});
 const MAX_BYTES = 15 * 1024 * 1024;   // fotos embebidas incluidas
 
 // Pregunta a Apps Script si el token es una sesión viva de quien publica.
@@ -43,11 +45,12 @@ async function sesionValida(token: unknown): Promise<boolean> {
 // Chrome solo puede descargar lo que la plantilla necesita
 const RED_PERMITIDA = /^(data:|about:|https:\/\/(fonts\.googleapis\.com|fonts\.gstatic\.com|drive\.google\.com|[a-z0-9-]+\.googleusercontent\.com)\/)/i;
 
-export async function OPTIONS() {
-  return new NextResponse(null, { status: 204, headers: corsHeaders });
+export async function OPTIONS(req: NextRequest) {
+  return new NextResponse(null, { status: 204, headers: corsPara(req.headers.get('origin')) });
 }
 
 export async function POST(req: NextRequest) {
+  const corsHeaders = corsPara(req.headers.get('origin'));
   let browser = null;
   try {
     const largo = Number(req.headers.get('content-length') || 0);
